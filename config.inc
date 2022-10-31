@@ -6,6 +6,15 @@ LANG_DE			= 1
 CHAR_ENCODING_ASCII	= 0
 CHAR_ENCODING_DE	= 1
 
+.ifdef atari
+PAGE_INDICATOR_SPRITE	= 2
+MARGIN_SPRITE		= 3
+.else
+; code not prepared to use these definitions
+PAGE_INDICATOR_SPRITE	= 6
+MARGIN_SPRITE		= 7
+.endif
+
 .if LOCALE=LOCALE_EN
 
 	LANG			= LANG_EN

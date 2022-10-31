@@ -266,12 +266,19 @@ L3534:  inx                                     ; 3534 E8                       
 initRulerEditing:
 	LoadB   mouseTop, 16    ; contrain mouse in ruler
         LoadB   mouseBottom, 28
+.ifndef atari
 	START_IO
         MoveB   $D027, $D02E ; color sprite 0 -> 7                           ; 3553 8D 2E D0                 ...
 	END_IO
+.endif
         ldx     #PROCESS_1                              ; 3559 A2 01                    ..
         jsr     RestartProcess                  ; 355B 20 06 C1                  ..
-L355E:  LoadB   r3L, 7
+L355E:
+.ifdef atari
+	LoadB   r3L, MARGIN_SPRITE
+.else
+	LoadB	r3L, 7
+.endif
         LoadW   r4, sprite_margin                            ; 3566 A9 3C                    .<
         ldx     zp_DAb                        ; 356A A6 DA                    ..
         cpx     #$04                            ; 356C E0 04                    ..
@@ -297,18 +304,29 @@ L3594:  sec                                     ; 3594 38                       
         lda     mouseYPos                       ; 35A2 A5 3C                    .<
         sbc     #$03                            ; 35A4 E9 03                    ..
         sta     r5L                             ; 35A6 85 0C                    ..
+.ifdef atari
+	LoadB	r3L, MARGIN_SPRITE
+	jsr	PosSprite
+	LoadB	r3L, MARGIN_SPRITE
+	jmp	EnablSprite
+.else
         lda     #$07                            ; 35A8 A9 07                    ..
         sta     r3L                             ; 35AA 85 08                    ..
         jsr     PosSprite                       ; 35AC 20 CF C1                  ..
         lda     #$07                            ; 35AF A9 07                    ..
         sta     r3L                             ; 35B1 85 08                    ..
         jmp     EnablSprite                     ; 35B3 4C D2 C1                 L..
+.endif
 
 ; ----------------------------------------------------------------------------
 L35B6:  ldx     #PROCESS_1
         jsr     BlockProcess		; disable mouse handler
+.ifdef atari
+	LoadB	r3L, MARGIN_SPRITE
+.else
         lda     #7
         sta     r3L
+.endif
         jsr     DisablSprite		; disable ruler item sprite
         LoadB   mouseTop, 0
         LoadB   mouseBottom, SC_PIX_HEIGHT-1
@@ -545,9 +563,11 @@ editPageIndicator:
         LoadB   mouseBottom, 15
 	LoadW   mouseLeft, 192
 	LoadW   mouseRight, 207
+.ifndef atari
 	START_IO
         MoveB   $D027, $D02D		; color sprite 0 -> 7 to make look active
 	END_IO
+.endif
         ldx     #PROCESS_2
         jsr     RestartProcess
         LoadB   zp_DBb, $FF
@@ -571,6 +591,7 @@ finishedEditingPageIndicator:
         ldx     #PROCESS_2
         jsr     BlockProcess
         LoadB   zp_DBb, 0
+.ifndef atari
 	START_IO
         LoadB   $D02D, 0 ; color sprite 6
         lda     $D00D ; sprite 6 Y
@@ -581,6 +602,7 @@ finishedEditingPageIndicator:
 :	tax
         jsr     L388A
 	END_IO
+.endif
         MoveW   r0, pagePosY
         jsr     pushRulerData
         jsr     L065D
@@ -598,8 +620,12 @@ L388A:  stx     r1L                             ; 388A 86 04                    
 ; ----------------------------------------------------------------------------
 L389C:  jsr     L38A9                           ; 389C 20 A9 38                  .8
         jsr     L38B4                           ; 389F 20 B4 38                  .8
+.ifdef atari
+	LoadB	r3L, PAGE_INDICATOR_SPRITE
+.else
         lda     #6                            ; 38A2 A9 06                    ..
         sta     r3L                             ; 38A4 85 08                    ..
+.endif
         jmp     PosSprite                       ; 38A6 4C CF C1                 L..
 
 ; ----------------------------------------------------------------------------

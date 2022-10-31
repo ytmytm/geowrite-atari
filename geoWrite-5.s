@@ -1034,10 +1034,12 @@ loadDeskAcc:
         jsr     tmpCloseDocFile
         jsr     saveTextscrapIfNeeded
 
+.ifndef atari
         jsr     i_MoveData		; save sprites 2 through 5
 		.word   spr2pic
 		.word	L7F00
 		.word	$0100
+.endif
 
         ldx     #<(scrrecvtab_deskacc-scrrecvtabs)
         jsr     screenSave		; save menu and ruler
@@ -1056,11 +1058,13 @@ loadDeskAcc:
         adc     #>(deskAccNames-17)
         sta     r6H
 
+.ifndef atari
         MoveB   CPU_DATA, r15L		; save and clear sprite double height register
         LoadB   CPU_DATA, IO_IN
         PushB   $D017
         LoadB   $D017, 0
         MoveB   r15L, CPU_DATA
+.endif
 
 	PushW   L4C95			; ???
         lda     #0
@@ -1072,10 +1076,12 @@ loadDeskAcc:
         jsr     swapUserZp
 	PopW    L4C95			; ???
 
+.ifndef atari
         MoveB   CPU_DATA, r15L		; restore sprite double height register
         LoadB   CPU_DATA, IO_IN
         PopB    $D017
         MoveB   r15L, CPU_DATA
+.endif
 
         txa				; save error code
         pha
@@ -1083,10 +1089,12 @@ loadDeskAcc:
         ldx     #<(scrrecvtab_deskacc-scrrecvtabs)
         jsr     screenRecover		; restore menu and ruler
 
+.ifndef atari
         jsr     i_MoveData		; restore sprites 2 through 5
 		.word   L7F00
 		.word	spr2pic
 		.word	$0100
+.endif
 
         pla
         tax
@@ -1107,10 +1115,12 @@ loadDeskAcc:
         jsr     scanTextScrap
         jsr     reopenDocFile
 
+.ifndef atari
         MoveB   screencolors, r2L	; restore color RAM
 	LoadW	r1, COLOR_MATRIX
 	LoadW	r0, 1000
         jsr     FillRam
+.endif
 
         jsr     pushRulerData
         jsr     L15D0
@@ -1148,9 +1158,11 @@ exitToDesktop:
 ; ----------------------------------------------------------------------------
 ; sets up the sprite used to indicate the currenly visible region on the page
 setupPageIndicatorSprite:
+.ifndef atari
 	START_IO
         LoadB   $D02D, 0		; sprite 6 color
 	END_IO
+.endif
         jsr     i_FillRam
 		.word   64,spr6pic
 		.byte   0
@@ -1165,9 +1177,28 @@ setupPageIndicatorSprite:
 		.word   spr_narrow_box
 		.word	spr6pic
 		.word	11
-@1:	rts
+@1:
+.ifdef atari
+	LoadB	r3L, PAGE_INDICATOR_SPRITE
+	LoadW	r4, spr6pic
+	jsr	DrawSprite
+.endif
+	rts
 
 ; ----------------------------------------------------------------------------
+.ifdef atari
+spr_wide_box:
+	.byte   %11111100,%00000000,%00000000
+	.byte   %10000100,%00000000,%00000000
+	.byte   %10000100,%00000000,%00000000
+	.byte   %11111100,%00000000
+
+spr_narrow_box:
+	.byte   %11110000,%00000000,%00000000
+	.byte   %10010000,%00000000,%00000000
+	.byte   %10010000,%00000000,%00000000
+	.byte   %11110000,%00000000
+.else
 spr_wide_box:
 	.byte   %11111111,%11100000,%00000000
 	.byte   %10000000,%00100000,%00000000
@@ -1179,6 +1210,7 @@ spr_narrow_box:
 	.byte   %10000001,%00000000,%00000000
 	.byte   %10000001,%00000000,%00000000
 	.byte   %11111111,%00000000
+.endif
 
 ; ----------------------------------------------------------------------------
 ; [XXX where is this ever written?]

@@ -323,7 +323,11 @@ drawMarginbar:
 ; Pass:      a5  vertical position on page
 ;---------------------------------------------------------------
 updatePageIndicator:
+.ifdef atari
+	LoadB	r3L, PAGE_INDICATOR_SPRITE
+.else
 	LoadB   r3L, 6			; page indicator sprite
+.endif
 	LoadW   r4, 192			; x coordinate
         ldy     sideFlippingOffset
         beq     @2			; at the very left
@@ -410,7 +414,12 @@ drawMarginBarItem2:
 
 @1:	and     (r5),y			; clear pixels
 @2:	sta     (r5),y
-@3:	AddVW	8, r5			; next 8 pixels
+@3:
+.ifdef atari
+	IncW	r5
+.else
+	AddVW	8, r5			; next 8 pixels
+.endif
 	jsr     incWr0			; next input byte
 	CmpWI	r11, SC_PIX_WIDTH-8
 	beq     @6			; clip on the right
@@ -4667,6 +4676,43 @@ screenRecover:
 	lda     #$FF
 :	sta     r4H
         jsr     loadScrRecoverlintab_yEntry
+.ifdef atari
+	; mess with dispBufferOn?
+;              r1L/r1H  r2L  r2H  r3L  r3H
+;                ptr      x    y wdth hght (x and width in cards, y and height in pixels)
+	ldy	r4H
+	PushB	r2L		; stack = left (cards)
+	add	r3L
+	sta	r4L		; r4L = right (cards)
+
+	MoveB	r2H, r2L	; r2L = top
+	add	r3H
+	sta	r2H		; r2H = bot
+
+	PopB	r3L		; r3L = left (cards)
+	LoadB	r3H, 0
+	sta	r4H
+
+	asl	r3L
+	rol	r3H
+	asl	r3L
+	rol	r3H
+	asl	r3L
+	rol	r3H
+
+	asl	r4L
+	rol	r4H
+	asl	r4L
+	rol	r4H
+	asl	r4L
+	rol	r4H
+
+	tya
+	bne	:+
+	jmp	ImprintRectangle
+:	jmp	RecoverRectangle
+
+.else
 @loop1: ldx     r2H
         jsr     GetScanLine
         lda     r2L
@@ -4715,6 +4761,7 @@ screenRecover:
         sta     (r5),y
         tya
         rts
+.endif
 
 loadScrRecoverlintab_yEntry:
 	ldy     #0
@@ -4899,6 +4946,13 @@ rulerP:
 ;            two pixels wide.
 ;---------------------------------------------------------------
 initTextPrompt:
+.ifdef atari
+	; no need to do anything to the prompt, it can be very tall and already is 2px wide
+	lda     cursor0+cursor::height
+	bne	:+
+	lda	#SYSTEM_FONT_SIZE
+:	jmp	InitTextPrompt
+.else
 	LoadB   CPU_DATA, IO_IN
 
         lda     #2			; prompt on top
@@ -4925,6 +4979,7 @@ initTextPrompt:
 
         LoadB   CPU_DATA, RAM_64K
         rts
+.endif
 
 ;---------------------------------------------------------------
 ; showError
@@ -5898,10 +5953,15 @@ flipScreenRTL:
         sta     (r6),y
         lda     #0
         sta     (r5),y			; clear source
+.ifdef atari
+	iny
+	cpy	#20
+.else
         tya
         add     #8			; next pixel
         tay
         cmp     #160			; half a screen's width?
+.endif
         bne     @loop2
         inx
         cpx     #40
@@ -5909,7 +5969,11 @@ flipScreenRTL:
 
         ldx     #40			; start line 40
 @loop3:	jsr     getScanLineAdd160
+.ifdef atari
+	ldy	#20
+.else
         ldy     #160
+.endif
 @loop4:	dey
         lda     (r5),y			; copy
         sta     (r6),y
@@ -5917,10 +5981,15 @@ flipScreenRTL:
         sta     (r5),y			; clear source
         tya
         bne     @loop4			; 160 bytes
+.ifdef atari
+	inx
+	cpx	windowBottom
+.else
         txa
         add     #8
         tax
         cmp     windowBottom
+.endif
         bcc     @loop3			; until bottom of screen
         rts
 
@@ -5928,7 +5997,11 @@ getScanLineAdd160:
 	jsr     GetScanLine
         ldy     r4L			; add 160 to register
         lda     0,y
+.ifdef atari
+	add	#20
+.else
         add     #160
+.endif
         sta     0,y
         lda     1,y
         adc     #0

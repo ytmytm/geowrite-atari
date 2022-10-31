@@ -988,12 +988,16 @@ copyScanline:
         ldx     #SC_BYTE_WIDTH
 @loop:  lda     (r4),y
         sta     (r5),y
+.ifdef atari
+	iny
+.else
         tya
         add     #8
         tay
         bcc     :+
         inc     r4H
         inc     r5H
+.endif
 :	dex
         bne     @loop
         rts

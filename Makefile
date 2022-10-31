@@ -3,6 +3,12 @@ ASFLAGS = -g
 
 LOCALE ?= en
 
+SYSTEM ?= atari
+
+ifeq ($(SYSTEM),atari)
+ASFLAGS+=-D atari
+endif
+
 ifeq ($(LOCALE),en)
 ASFLAGS+=-D LOCALE=0 -I en
 else ifeq ($(LOCALE),de)
