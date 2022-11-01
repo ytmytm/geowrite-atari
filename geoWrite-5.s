@@ -1036,9 +1036,15 @@ loadDeskAcc:
 
 .ifdef atari
 	; from scrrecvtab_deskacc - top 36 lines
-	jsr	i_ImprintRectangle
-	.byte	0, 36
-	.word	0, 319
+	; cant imprint them to backbuffer because deskacc may use menu that will imprint over that
+	; so just copy from front buffer
+	; two assumptions: no gaps between the lines and frontbuffer is accessible
+	ldx 	#0
+	jsr	GetScanLine
+	MoveW	r5, r0			; source
+	LoadW	r1, MEM_SCRRECV		; destination
+	LoadW	r2, 36*SC_BYTE_WIDTH	; length
+	jsr	MoveData
 .else
         jsr     i_MoveData		; save sprites 2 through 5
 		.word   spr2pic
@@ -1093,9 +1099,12 @@ loadDeskAcc:
 
 .ifdef atari
 	; from scrrecvtab_deskacc - top 36 lines
-	jsr	i_RecoverRectangle
-	.byte	0, 36
-	.word	0, 319
+	ldx 	#0
+	jsr	GetScanLine
+	MoveW	r5, r1			; destination
+	LoadW	r0, MEM_SCRRECV		; source
+	LoadW	r2, 36*SC_BYTE_WIDTH	; length
+	jsr	MoveData
 .else
         ldx     #<(scrrecvtab_deskacc-scrrecvtabs)
         jsr     screenRecover		; restore menu and ruler
