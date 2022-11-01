@@ -1035,8 +1035,9 @@ loadDeskAcc:
         jsr     saveTextscrapIfNeeded
 
 .ifdef atari
+	; from scrrecvtab_deskacc - top 36 lines
 	jsr	i_ImprintRectangle
-	.byte	0, 199
+	.byte	0, 36
 	.word	0, 319
 .else
         jsr     i_MoveData		; save sprites 2 through 5
@@ -1091,8 +1092,9 @@ loadDeskAcc:
         pha
 
 .ifdef atari
+	; from scrrecvtab_deskacc - top 36 lines
 	jsr	i_RecoverRectangle
-	.byte	0, 199
+	.byte	0, 36
 	.word	0, 319
 .else
         ldx     #<(scrrecvtab_deskacc-scrrecvtabs)
