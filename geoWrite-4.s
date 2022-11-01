@@ -590,7 +590,10 @@ finishedEditingPageIndicator:
         ldx     #PROCESS_2
         jsr     BlockProcess
         LoadB   zp_DBb, 0
-.ifndef atari
+.ifdef atari
+	ldx	#12
+	jsr	L388A
+.else
 	START_IO
         LoadB   $D02D, 0 ; color sprite 6
         lda     $D00D ; sprite 6 Y
