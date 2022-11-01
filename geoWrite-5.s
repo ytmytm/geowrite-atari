@@ -1045,12 +1045,12 @@ loadDeskAcc:
 	LoadW	r1, MEM_SCRRECV		; destination
 	LoadW	r2, 36*SC_BYTE_WIDTH	; length
 	jsr	MoveData
-.else
+.endif
         jsr     i_MoveData		; save sprites 2 through 5
 		.word   spr2pic
 		.word	L7F00
 		.word	$0100
-
+.ifndef atari
         ldx     #<(scrrecvtab_deskacc-scrrecvtabs)
         jsr     screenSave		; save menu and ruler
 .endif
@@ -1108,12 +1108,11 @@ loadDeskAcc:
 .else
         ldx     #<(scrrecvtab_deskacc-scrrecvtabs)
         jsr     screenRecover		; restore menu and ruler
-
+.endif
         jsr     i_MoveData		; restore sprites 2 through 5
 		.word   L7F00
 		.word	spr2pic
 		.word	$0100
-.endif
 
         pla
         tax
