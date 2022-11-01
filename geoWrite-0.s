@@ -4616,9 +4616,13 @@ prepareMenu:
         jsr     J2_blockSelectionProcess
         jsr     clearRecoverOffsetB
         LoadW_  keyVector, 0		; disable keyboard shortcuts
+.ifdef atari
+	jmp	killPrompt
+.else
         jsr     killPrompt
         ldx     a2L
         jmp     screenSave
+.endif
 
 ;---------------------------------------------------------------
 ; appRecoverVector
@@ -4675,44 +4679,11 @@ screenSave:
 screenRecover:
 	lda     #$FF
 :	sta     r4H
-        jsr     loadScrRecoverlintab_yEntry
 .ifdef atari
-	; mess with dispBufferOn?
-;              r1L/r1H  r2L  r2H  r3L  r3H
-;                ptr      x    y wdth hght (x and width in cards, y and height in pixels)
-	ldy	r4H
-	PushB	r2L		; stack = left (cards)
-	add	r3L
-	sta	r4L		; r4L = right (cards)
-
-	MoveB	r2H, r2L	; r2L = top
-	add	r3H
-	sta	r2H		; r2H = bot
-
-	PopB	r3L		; r3L = left (cards)
-	LoadB	r3H, 0
-	sta	r4H
-
-	asl	r3L
-	rol	r3H
-	asl	r3L
-	rol	r3H
-	asl	r3L
-	rol	r3H
-
-	asl	r4L
-	rol	r4H
-	asl	r4L
-	rol	r4H
-	asl	r4L
-	rol	r4H
-
-	tya
-	bne	:+
-	jmp	ImprintRectangle
-:	jmp	RecoverRectangle
-
+	; do nothing, system handles backbuffer
+	rts
 .else
+        jsr     loadScrRecoverlintab_yEntry
 @loop1: ldx     r2H
         jsr     GetScanLine
         lda     r2L
@@ -5393,6 +5364,12 @@ swapUserZp:
 ; Pass:      x:a  pointer to dialog box data
 ;---------------------------------------------------------------
 doDlgBox:
+.ifdef atari
+	sta	r0L
+	stx	r0H
+        ;jsr     clearRecoverOffsetB
+	jmp	DoDlgBox
+.else
 	sta     r0L
         stx     r0H
         jsr     clearRecoverOffsetB
@@ -5402,6 +5379,7 @@ doDlgBox:
         jsr     screenSave
 	PopW    r5
         jmp     DoDlgBox
+.endif
 
 ;---------------------------------------------------------------
 ; pushRulerData
