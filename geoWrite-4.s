@@ -307,7 +307,6 @@ L3594:  sec                                     ; 3594 38                       
 .ifdef atari
 	LoadB	r3L, MARGIN_SPRITE
 	jsr	PosSprite
-	LoadB	r3L, MARGIN_SPRITE
 	jmp	EnablSprite
 .else
         lda     #$07                            ; 35A8 A9 07                    ..
