@@ -390,7 +390,11 @@ drawMarginBarItem1:
 ; Pass:      r0  pointer to icon
 ;---------------------------------------------------------------
 drawMarginBarItem2:
+.ifdef atari
+	lda	#1			; 1 byte to the right
+.else
 	lda     #8
+.endif
         ldx     #r11
         jsr     subWBI			; r11 -= 8
 
@@ -402,7 +406,11 @@ drawMarginBarItem2:
 @loop:  jsr     GetScanLine		; r5 = scanline ptr + r11
         AddW    r11, r5
         ldy     #0
+.ifdef atari
+	CmpWI	r11, -1
+.else
 	CmpWI	r11, -8
+.endif
 	beq     @3			; clip on the left
 
         lda     (r0),y			; get first byte of row
@@ -421,7 +429,11 @@ drawMarginBarItem2:
 	AddVW	8, r5			; next 8 pixels
 .endif
 	jsr     incWr0			; next input byte
+.ifdef atari
+	CmpWI	r11, SC_PIX_WIDTH-1
+.else
 	CmpWI	r11, SC_PIX_WIDTH-8
+.endif
 	beq     @6			; clip on the right
 
         lda     (r0),y			; get second byte of row
@@ -439,7 +451,11 @@ drawMarginBarItem2:
         bmi     @loop
 
         ldx     #r11
+.ifdef atari
+	lda	#1
+.else
         lda     #8
+.endif
         jmp     addWIToZp
 
 ; ----------------------------------------------------------------------------
