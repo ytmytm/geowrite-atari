@@ -1034,15 +1034,19 @@ loadDeskAcc:
         jsr     tmpCloseDocFile
         jsr     saveTextscrapIfNeeded
 
-.ifndef atari
+.ifdef atari
+	jsr	i_ImprintRectangle
+	.byte	0, 199
+	.word	0, 319
+.else
         jsr     i_MoveData		; save sprites 2 through 5
 		.word   spr2pic
 		.word	L7F00
 		.word	$0100
-.endif
 
         ldx     #<(scrrecvtab_deskacc-scrrecvtabs)
         jsr     screenSave		; save menu and ruler
+.endif
 
         pla
         sta     r6L
@@ -1086,10 +1090,14 @@ loadDeskAcc:
         txa				; save error code
         pha
 
+.ifdef atari
+	jsr	i_RecoverRectangle
+	.byte	0, 199
+	.word	0, 319
+.else
         ldx     #<(scrrecvtab_deskacc-scrrecvtabs)
         jsr     screenRecover		; restore menu and ruler
 
-.ifndef atari
         jsr     i_MoveData		; restore sprites 2 through 5
 		.word   L7F00
 		.word	spr2pic
