@@ -28,7 +28,7 @@ MARGIN_SPRITE		= 7
 	PROT_EXEC_SECTOR	= 7
 	PROT_SERIAL_TRACK	= 14
 	PROT_SERIAL_SECTOR	= 13
-	SERIAL			= $58B5	; cmdrkey.com serial
+	SERIAL			= $1CD5	;$58B5	; cmdrkey.com serial
 
 .elseif LOCALE=LOCALE_DE
 
