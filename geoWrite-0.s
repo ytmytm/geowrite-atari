@@ -2820,11 +2820,30 @@ __1:	cmp     windowBottom
 :	tax
         jsr     GetScanLine
         MoveW   r5, r1
+.ifdef atari
+	ldx	#199
+	jsr	GetScanLine
+	MoveB	r5H, r0H
+	clc
+	lda	r5L
+	adc	#SC_BYTE_WIDTH
+	sta	r0L
+	bcc	:+
+	inc	r0H
+:
+.else
 	LoadW   r0, SCREEN_BASE+25*320
+.endif
         lda     windowBottom
         cmp     #SC_PIX_HEIGHT-1
         beq     :+
+.ifdef atari
+	ldx	#200-8
+	jsr	GetScanLine
+	MoveW	r5, r0
+.else
 	LoadW   r0, SCREEN_BASE+23*320
+.endif
 :	SubW    r1, r0
         MoveB   r14L, r2L
         jsr     FillRam
